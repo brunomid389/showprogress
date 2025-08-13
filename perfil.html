@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil</title>
+  <link href="profile.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="header">
+    <a href="index.html" class="back-arrow">←</a>
+    Perfil
+  </div>
+
+  <div class="cover"></div>
+
+  <div class="profile-container">
+    <div class="profile-pic-container">
+      <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Foto de perfil" class="profile-pic">
+      <div class="edit-icon" onclick="editProfilePic()">✎</div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-label">Nome</div>
+      <div class="info-value" contenteditable="false">Laura Sousa Marconde</div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-label">Telefone</div>
+      <div class="info-value" contenteditable="false">5581998756423</div>
+    </div>
+
+     <div class="info-section">
+      <div class="info-label">email</div>
+      <div class="info-value" contenteditable="false"></div>
+    </div>
+
+     <div class="info-section">
+      <div class="info-label">Senha</div>
+      <div class="info-value" contenteditable="false"></div>
+    </div>
+
+     <div class="info-section">
+      <div class="info-label">Comunidade</div>
+      <div class="info-value" contenteditable="false"></div>
+    </div>
+
+    <button class="edit-btn" onclick="toggleEdit()">Editar</button>
+  </div>
+
+  <script src="profile.js"></script>
+</body>
+</html>
