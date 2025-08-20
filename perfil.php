@@ -1,6 +1,7 @@
 <?php
 session_start();
 include("conexao.php");
+include("log.php"); // Inclui a função de logs
 
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.html");
@@ -16,6 +17,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? '';
     $senha = $_POST['senha'] ?? '';
 
+    // Buscar dados antigos para log
+    $stmtOld = $conn->prepare("SELECT nome, telefone, email, senha FROM usuario WHERE id_usuario=?");
+    $stmtOld->bind_param("i", $usuarioId);
+    $stmtOld->execute();
+    $resultOld = $stmtOld->get_result();
+    $usuarioAntigo = $resultOld->fetch_assoc();
+    $stmtOld->close();
+
     $sql = "UPDATE usuario SET nome=?, telefone=?, email=?, senha=? WHERE id_usuario=?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ssssi", $nome, $telefone, $email, $senha, $usuarioId);
@@ -26,6 +35,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['usuario']['nome'] = $nome;
     $_SESSION['usuario']['telefone'] = $telefone;
     $_SESSION['usuario']['email'] = $email;
+
+    // Registrar log com alterações
+    $detalhes = "Antes: Nome={$usuarioAntigo['nome']}, Telefone={$usuarioAntigo['telefone']}, Email={$usuarioAntigo['email']}";
+    $detalhes .= " | Depois: Nome={$nome}, Telefone={$telefone}, Email={$email}";
+    registrarLog($usuarioId, "Alteração de perfil", $detalhes);
 
     header("Location: perfil.php");
     exit();

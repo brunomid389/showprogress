@@ -1,12 +1,11 @@
 <?php
 session_start();
-include("conexao.php"); // conexão com banco
+include("conexao.php");
+include("log.php"); // Inclui a função de logs
 
-// Recupera o id do usuário logado da sessão
 $id_usuario = $_SESSION['usuario']['id'] ?? null;
 $nome_usuario = $_SESSION['usuario']['nome'] ?? "Usuário";
 
-// Se não tiver logado, bloqueia
 if (!$id_usuario) {
     die("Usuário não logado. <a href='login.html'>Faça login</a>");
 }
@@ -20,10 +19,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['mensagem'])) {
         $stmt->bind_param("si", $texto, $id_usuario);
         $stmt->execute();
         $stmt->close();
+
+        // Registrar log da mensagem
+        registrarLog($id_usuario, "Nova mensagem no chat", "Mensagem: $texto");
     }
 }
 
-// Agora busca TODAS as mensagens do chat geral (não só do usuário logado)
+// Buscar mensagens do chat geral
 $sql = "SELECT m.texto, u.nome 
         FROM mensagem m
         INNER JOIN usuario u ON m.id_usuario = u.id_usuario

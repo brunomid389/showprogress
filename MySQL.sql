@@ -44,19 +44,17 @@ CREATE TABLE usuario (
     telefone VARCHAR(11) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
-    nascimento DATE NOT NULL,
+    nascimento DATE,
     parente VARCHAR(255) NULL,
     filho VARCHAR(255) NULL,
     id_comunidade INT NOT NULL,
     FOREIGN KEY (id_comunidade) REFERENCES comunidade(id_comunidade)
 );
 
-# Valor do id_comunidade vai ser adicionado pelo JDBC
-# Uusario cria conta -> JDBC salva valores em variáveis -> JDBC insere variáveis em 'usuario'
-INSERT INTO usuario(nome, telefone, email, senha, id_comunidade) VALUES
-("Eduardo Passos", "987654", "edu@gmail.com", "123", "1"),
-("Bruno Rafael", "123456", "bru@gmail.com", "123", "10"),
-("Diógenes Luiz", "654321", "dio@gmail.com", "123", "3");
+INSERT INTO usuario(nome, telefone, email, senha, nascimento, id_comunidade) VALUES
+("Eduardo Passos", "987654", "edu@gmail.com", "123", "2009-03-18", "1"),
+("Bruno Rafael", "123456", "bru@gmail.com", "123", "2007-08-14", "10"),
+("Diógenes Luiz", "654321", "dio@gmail.com", "123", "2008-01-01", "3");
 
 # Postagens vão possuir tags sobre os locais ou temas que estão relacionados a postagem.
 # O usuário pode criar uma tag nova ao adicioná-la a uma postagem
@@ -118,10 +116,13 @@ ON p.id_usuario = u.id_usuario
 INNER JOIN comunidade c
 ON p.id_comunidade = c.id_comunidade;
 
+CREATE TABLE log (
+    id_log INT PRIMARY KEY AUTO_INCREMENT,
+    id_usuario INT NULL,
+    acao VARCHAR(255) NOT NULL,
+    detalhes TEXT NULL,
+    data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+);
 
-
-SELECT * FROM comunidade;
-SELECT * FROM usuario;
-SELECT * FROM postagem;
-SELECT * FROM mensagem;
-SELECT * FROM tag;
+SELECT * FROM log;
