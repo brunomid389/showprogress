@@ -8,7 +8,16 @@ function toggleEdit() {
   } else {
     fields.forEach(f => f.setAttribute('contenteditable', 'false'));
     btn.textContent = 'Editar';
-    alert('Informações salvas!');
+
+    // Atualiza inputs escondidos
+    const form = document.getElementById('profileForm');
+    form.querySelector('input[name="nome"]').value = fields[0].textContent.trim();
+    form.querySelector('input[name="telefone"]').value = fields[1].textContent.trim();
+    form.querySelector('input[name="email"]').value = fields[2].textContent.trim();
+    form.querySelector('input[name="senha"]').value = fields[3].textContent.trim();
+    form.querySelector('input[name="nascimento"]').value = fields[4].textContent.trim();
+
+    form.submit(); // envia para atualizar no banco
   }
 }
 

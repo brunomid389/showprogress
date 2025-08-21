@@ -1,7 +1,7 @@
 <?php
 session_start();
 include("conexao.php");
-include("log.php"); // Inclui a função de logs
+include("log.php"); // Função de logs
 
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.html");
@@ -16,29 +16,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $telefone = $_POST['telefone'] ?? '';
     $email = $_POST['email'] ?? '';
     $senha = $_POST['senha'] ?? '';
+    $nascimento = $_POST['nascimento'] ?? '';
 
     // Buscar dados antigos para log
-    $stmtOld = $conn->prepare("SELECT nome, telefone, email, senha FROM usuario WHERE id_usuario=?");
+    $stmtOld = $conn->prepare("SELECT nome, telefone, email, senha, nascimento FROM usuario WHERE id_usuario=?");
     $stmtOld->bind_param("i", $usuarioId);
     $stmtOld->execute();
     $resultOld = $stmtOld->get_result();
     $usuarioAntigo = $resultOld->fetch_assoc();
     $stmtOld->close();
 
-    $sql = "UPDATE usuario SET nome=?, telefone=?, email=?, senha=? WHERE id_usuario=?";
+    $sql = "UPDATE usuario SET nome=?, telefone=?, email=?, senha=?, nascimento=? WHERE id_usuario=?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssi", $nome, $telefone, $email, $senha, $usuarioId);
+    $stmt->bind_param("sssssi", $nome, $telefone, $email, $senha, $nascimento, $usuarioId);
     $stmt->execute();
     $stmt->close();
 
-    // Atualiza a sessão
+    // Atualiza sessão
     $_SESSION['usuario']['nome'] = $nome;
     $_SESSION['usuario']['telefone'] = $telefone;
     $_SESSION['usuario']['email'] = $email;
+    $_SESSION['usuario']['nascimento'] = $nascimento;
 
-    // Registrar log com alterações
-    $detalhes = "Antes: Nome={$usuarioAntigo['nome']}, Telefone={$usuarioAntigo['telefone']}, Email={$usuarioAntigo['email']}";
-    $detalhes .= " | Depois: Nome={$nome}, Telefone={$telefone}, Email={$email}";
+    // Registrar log
+    $detalhes = "Antes: Nome={$usuarioAntigo['nome']}, Telefone={$usuarioAntigo['telefone']}, Email={$usuarioAntigo['email']}, Nascimento={$usuarioAntigo['nascimento']}";
+    $detalhes .= " | Depois: Nome={$nome}, Telefone={$telefone}, Email={$email}, Nascimento={$nascimento}";
     registrarLog($usuarioId, "Alteração de perfil", $detalhes);
 
     header("Location: perfil.php");
@@ -46,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Buscar dados atuais do usuário
-$sql = "SELECT u.nome, u.telefone, u.email, u.senha, c.uf, c.cidade, c.bairro 
+$sql = "SELECT u.nome, u.telefone, u.email, u.senha, u.nascimento, c.uf, c.cidade, c.bairro 
         FROM usuario u 
         JOIN comunidade c ON u.id_comunidade = c.id_comunidade
         WHERE u.id_usuario = ?";
@@ -85,34 +87,40 @@ $conn->close();
       
       <div class="info-section">
         <div name="nome" class="info-label">Nome</div>
-        <div class="info-value" contenteditable="false"><?php echo htmlspecialchars($usuario['nome']); ?></div>
+        <div class="info-value" contenteditable="false"><?= htmlspecialchars($usuario['nome']); ?></div>
         <input type="hidden" name="nome">
       </div>
 
       <div class="info-section">
         <div name="telefone" class="info-label">Telefone</div>
-        <div class="info-value" contenteditable="false"><?php echo htmlspecialchars($usuario['telefone']); ?></div>
+        <div class="info-value" contenteditable="false"><?= htmlspecialchars($usuario['telefone']); ?></div>
         <input type="hidden" name="telefone">
       </div>
 
       <div class="info-section">
         <div name="email" class="info-label">Email</div>
-        <div class="info-value" contenteditable="false"><?php echo htmlspecialchars($usuario['email']); ?></div>
+        <div class="info-value" contenteditable="false"><?= htmlspecialchars($usuario['email']); ?></div>
         <input type="hidden" name="email">
       </div>
 
       <div class="info-section">
         <div name="senha" class="info-label">Senha</div>
-        <div class="info-value" contenteditable="false"><?php echo htmlspecialchars($usuario['senha']); ?></div>
+        <div class="info-value" contenteditable="false"><?= htmlspecialchars($usuario['senha']); ?></div>
         <input type="hidden" name="senha">
       </div>
 
       <div class="info-section">
-        <div name="comunidade" class="info-label">Comunidade</div>
-        <div class="info-value" contenteditable="false"><?php echo htmlspecialchars($usuario['bairro'] . " - " . $usuario['cidade'] . "/" . $usuario['uf']); ?></div>
+        <div name="nascimento" class="info-label">Data de Nascimento</div>
+        <div class="info-value" contenteditable="false"><?= htmlspecialchars($usuario['nascimento']); ?></div>
+        <input type="hidden" name="nascimento">
       </div>
 
-            <hr style="margin:20px 0;">
+      <div class="info-section">
+        <div name="comunidade" class="info-label">Comunidade</div>
+        <div class="info-value" contenteditable="false"><?= htmlspecialchars($usuario['bairro'] . " - " . $usuario['cidade'] . "/" . $usuario['uf']); ?></div>
+      </div>
+
+      <hr style="margin:20px 0;">
 
       <div class="info-section">
         <div class="info-label">Notificações</div>
@@ -142,35 +150,6 @@ $conn->close();
     </form>
   </div>
 
-  <script>
-    function toggleEdit() {
-      const fields = document.querySelectorAll('.info-value');
-      const btn = document.querySelector('.edit-btn');
-
-      if (btn.textContent === 'Editar') {
-        fields.forEach(f => f.setAttribute('contenteditable', 'true'));
-        btn.textContent = 'Salvar';
-      } else {
-        fields.forEach(f => f.setAttribute('contenteditable', 'false'));
-        btn.textContent = 'Editar';
-
-        // Atualiza inputs escondidos
-        const form = document.getElementById('profileForm');
-        form.querySelector('input[name="nome"]').value = fields[0].textContent.trim();
-        form.querySelector('input[name="telefone"]').value = fields[1].textContent.trim();
-        form.querySelector('input[name="email"]').value = fields[2].textContent.trim();
-        form.querySelector('input[name="senha"]').value = fields[3].textContent.trim();
-
-        form.submit(); // envia para atualizar no banco
-      }
-    }
-
-    function editProfilePic() {
-      const newUrl = prompt('Insira a URL da nova foto de perfil:');
-      if (newUrl) {
-        document.querySelector('.profile-pic').src = newUrl;
-      }
-    }
-  </script>
+  <script src="assets/js/profile.js"></script>
 </body>
 </html>
