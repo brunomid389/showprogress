@@ -44,9 +44,7 @@ CREATE TABLE usuario (
     telefone VARCHAR(11) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
-    nascimento DATE,
-    parente VARCHAR(255) NULL,
-    filho VARCHAR(255) NULL,
+    nascimento DATE NOT NULL,
     id_comunidade INT NOT NULL,
     FOREIGN KEY (id_comunidade) REFERENCES comunidade(id_comunidade)
 );
@@ -55,6 +53,14 @@ INSERT INTO usuario(nome, telefone, email, senha, nascimento, id_comunidade) VAL
 ("Eduardo Passos", "987654", "edu@gmail.com", "123", "2009-03-18", "1"),
 ("Bruno Rafael", "123456", "bru@gmail.com", "123", "2007-08-14", "10"),
 ("Diógenes Luiz", "654321", "dio@gmail.com", "123", "2008-01-01", "3");
+
+CREATE TABLE parente (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_pai INT NOT NULL,
+    id_filho INT NOT NULL,
+    FOREIGN KEY (id_pai) REFERENCES usuario(id_usuario),
+    FOREIGN KEY (id_filho) REFERENCES usuario(id_usuario)
+);
 
 # Postagens vão possuir tags sobre os locais ou temas que estão relacionados a postagem.
 # O usuário pode criar uma tag nova ao adicioná-la a uma postagem
@@ -93,6 +99,7 @@ INSERT INTO chat(tipo) VALUES ("geral"), ("reels"), ("postagem");
  CREATE TABLE mensagem (
 	id_comentario INT PRIMARY KEY AUTO_INCREMENT,
     texto VARCHAR(500) NOT NULL,
+    data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     id_usuario INT NOT NULL,
     id_chat INT NOT NULL,
     id_postagem INT NULL,
@@ -118,11 +125,13 @@ ON p.id_comunidade = c.id_comunidade;
 
 CREATE TABLE log (
     id_log INT PRIMARY KEY AUTO_INCREMENT,
-    id_usuario INT NULL,
-    acao VARCHAR(255) NOT NULL,
-    detalhes TEXT NULL,
+    id_usuario INT NULL, -- usuário responsável pela ação (se existir)
+    acao VARCHAR(255) NOT NULL, -- tipo de ação (login, criar_postagem, editar_perfil, etc)
+    detalhes TEXT NULL, -- informações adicionais (qual postagem foi criada, valores alterados etc)
     data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 );
 
+SELECT * FROM usuario;
+SELECT * FROM parente;
 SELECT * FROM log;

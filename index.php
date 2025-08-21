@@ -61,6 +61,7 @@ $result = $conn->query($sql);
         <a href="projetos.html"><button>Projetos</button></a>
         <a href="rascunhos.html"><button>Seus rascunhos</button></a>
         <a href="configurações.html"><button>Configurações</button></a>
+        <a href="parente.php"><button>Controle parental</button></a>
       </nav>
     </aside>
 

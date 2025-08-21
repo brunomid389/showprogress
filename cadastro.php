@@ -6,6 +6,7 @@ include("conexao.php");
 $nome = $_POST['nome'];
 $email = $_POST['email'];
 $telefone = $_POST['telefone'];
+$nascimento = $_POST['nascimento'];
 $senha = $_POST['senha'];
 $confirmSenha = $_POST['confirmSenha'];
 
@@ -19,6 +20,7 @@ $_SESSION['cadastro'] = [
     'nome' => $nome,
     'email' => $email,
     'telefone' => $telefone,
+    'nascimento'=> $nascimento,
     'senha' => $senha
 ];
 

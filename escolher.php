@@ -32,13 +32,14 @@ if ($result && $result->num_rows > 0) {
     $nome     = $_SESSION['cadastro']['nome'];
     $email    = $_SESSION['cadastro']['email'];
     $telefone = $_SESSION['cadastro']['telefone'];
+    $nascimento = $_SESSION['cadastro']['nascimento'];
     $senha    = $_SESSION['cadastro']['senha'];
 
     // Inserir usuário
-    $sqlU = "INSERT INTO usuario (nome, telefone, email, senha, id_comunidade)
-             VALUES (?, ?, ?, ?, ?)";
+    $sqlU = "INSERT INTO usuario (nome, telefone, email, nascimento, senha, id_comunidade)
+             VALUES (?, ?, ?, ?, ?, ?)";
     $stmtU = $conn->prepare($sqlU);
-    $stmtU->bind_param("ssssi", $nome, $telefone, $email, $senha, $id_comunidade);
+    $stmtU->bind_param("sssssi", $nome, $telefone, $email, $nascimento, $senha, $id_comunidade);
 
 if ($stmtU->execute()) {
     // Pega o ID do usuário recém-criado
