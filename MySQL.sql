@@ -125,9 +125,9 @@ ON p.id_comunidade = c.id_comunidade;
 
 CREATE TABLE log (
     id_log INT PRIMARY KEY AUTO_INCREMENT,
-    id_usuario INT NULL, -- usuário responsável pela ação (se existir)
-    acao VARCHAR(255) NOT NULL, -- tipo de ação (login, criar_postagem, editar_perfil, etc)
-    detalhes TEXT NULL, -- informações adicionais (qual postagem foi criada, valores alterados etc)
+    id_usuario INT NULL, 
+    acao VARCHAR(255) NOT NULL,
+    detalhes TEXT NULL, 
     data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 );

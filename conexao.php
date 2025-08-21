@@ -2,7 +2,7 @@
 $host = "localhost";
 $db = "sinas";
 $user = "root";
-$pass = "senha";
+$pass = "";
 
 $conn = new mysqli($host, $user, $pass, $db);
 

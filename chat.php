@@ -68,7 +68,7 @@ while ($row = $result->fetch_assoc()) {
         <a href="reels.html"><button>Reels</button></a>
         <a href="chat.php"><button>Chat geral</button></a>
         <a href="projetos.html"><button>Projetos</button></a>
-        <a href="rascunhos.html"><button>Seus rascunhos</button></a>
+        <a href="parente.php"><button>Controle parental</button></a>
         <a href="configurações.html"> <button>Configurações</button></a>
         <a href="logout.php"><button>Sair</button></a>
       </nav>

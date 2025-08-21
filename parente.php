@@ -2,147 +2,153 @@
 session_start();
 include("conexao.php");
 
-if (!isset($_SESSION['usuario'])) {
+$usuario = $_SESSION['usuario'] ?? null;
+
+if (!$usuario) {
     header("Location: login.html");
     exit();
 }
 
-$usuario = $_SESSION['usuario'];
-$id_pai = $usuario['id'];
-$mensagemErro = "";
-$mensagemSucesso = "";
-
-// Adicionar novo filho
-if (isset($_POST['email_filho'])) {
+// Adicionar filho
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email_filho'])) {
     $email_filho = trim($_POST['email_filho']);
 
-    // Verifica se o usuário existe
-    $sql = "SELECT id_usuario, nome FROM usuario WHERE email = ?";
-    $stmt = $conn->prepare($sql);
+    // Busca o filho pelo email + data de nascimento
+    $stmt = $conn->prepare("SELECT id_usuario, nascimento FROM usuario WHERE email = ?");
     $stmt->bind_param("s", $email_filho);
     $stmt->execute();
-    $res = $stmt->get_result();
-    $filho = $res->fetch_assoc();
+    $result = $stmt->get_result();
 
-    if ($filho) {
+    if ($result && $result->num_rows > 0) {
+        $filho = $result->fetch_assoc();
         $id_filho = $filho['id_usuario'];
+        $data_nasc = $filho['nascimento'];
 
-        // Verifica se já existe vínculo
-        $sqlCheck = "SELECT * FROM parente WHERE id_pai = ? AND id_filho = ?";
-        $stmtCheck = $conn->prepare($sqlCheck);
-        $stmtCheck->bind_param("ii", $id_pai, $id_filho);
-        $stmtCheck->execute();
-        $resCheck = $stmtCheck->get_result();
+        // Calcular idade
+        $hoje = new DateTime();
+        $nascimento = new DateTime($data_nasc);
+        $idade = $hoje->diff($nascimento)->y;
 
-        if ($resCheck->num_rows == 0) {
-            // Insere na tabela parente
-            $sqlInsert = "INSERT INTO parente (id_pai, id_filho) VALUES (?, ?)";
-            $stmtInsert = $conn->prepare($sqlInsert);
-            $stmtInsert->bind_param("ii", $id_pai, $id_filho);
-            if ($stmtInsert->execute()) {
-                $mensagemSucesso = "Filho adicionado com sucesso!";
-            } else {
-                $mensagemErro = "Erro ao adicionar filho.";
-            }
+        if ($idade >= 18) {
+            $msg = "Esse usuário não pode ser adicionado como filho (tem $idade anos).";
         } else {
-            $mensagemErro = "Este filho já está cadastrado.";
+            // Verifica se já está cadastrado como filho
+            $check = $conn->prepare("SELECT * FROM parente WHERE id_pai = ? AND id_filho = ?");
+            $check->bind_param("ii", $usuario['id'], $id_filho);
+            $check->execute();
+            $check_result = $check->get_result();
+
+            if ($check_result->num_rows === 0) {
+                $insert = $conn->prepare("INSERT INTO parente (id_pai, id_filho) VALUES (?, ?)");
+                $insert->bind_param("ii", $usuario['id'], $id_filho);
+                $insert->execute();
+                $msg = "Filho adicionado com sucesso!";
+            } else {
+                $msg = "Esse usuário já está cadastrado como seu filho.";
+            }
         }
     } else {
-        $mensagemErro = "Não existe nenhum usuário com esse email.";
+        $msg = "Usuário com este email não encontrado.";
     }
 }
 
-// Buscar filhos já cadastrados
-$sqlFilhos = "SELECT u.id_usuario, u.nome, u.email 
-              FROM usuario u
-              INNER JOIN parente p ON u.id_usuario = p.id_filho
-              WHERE p.id_pai = ?";
-$stmtFilhos = $conn->prepare($sqlFilhos);
-$stmtFilhos->bind_param("i", $id_pai);
-$stmtFilhos->execute();
-$resultFilhos = $stmtFilhos->get_result();
+// Buscar filhos cadastrados
+$stmt = $conn->prepare("SELECT u.id_usuario, u.nome, u.email FROM usuario u 
+                        INNER JOIN parente p ON u.id_usuario = p.id_filho 
+                        WHERE p.id_pai = ?");
+$stmt->bind_param("i", $usuario['id']);
+$stmt->execute();
+$filhos = $stmt->get_result();
 
-$filhos = [];
-while ($row = $resultFilhos->fetch_assoc()) {
-    $filhos[] = $row;
-}
-
+// Buscar mensagens do filho selecionado
 $mensagens = [];
-$filhoSelecionado = null;
-
-// Se um filho for selecionado para ver mensagens
-if (isset($_POST['id_filho'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_filho'])) {
     $id_filho = intval($_POST['id_filho']);
-    foreach ($filhos as $f) {
-        if ($f['id_usuario'] == $id_filho) {
-            $filhoSelecionado = $f;
-            break;
-        }
-    }
 
-    if ($filhoSelecionado) {
-        $sqlMsg = "SELECT texto, data_envio FROM mensagem WHERE id_usuario = ? ORDER BY data_envio DESC";
-        $stmtMsg = $conn->prepare($sqlMsg);
-        $stmtMsg->bind_param("i", $id_filho);
-        $stmtMsg->execute();
-        $resMsg = $stmtMsg->get_result();
-
-        while ($row = $resMsg->fetch_assoc()) {
-            $mensagens[] = $row;
-        }
-    }
+    $stmt = $conn->prepare("SELECT texto, data_envio FROM mensagem WHERE id_usuario = ? ORDER BY data_envio DESC");
+    $stmt->bind_param("i", $id_filho);
+    $stmt->execute();
+    $mensagens = $stmt->get_result();
 }
+
 ?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Controle Parental</title>
+  <meta charset="UTF-8">
+  <title>Controle Parental</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .parental-container { padding: 20px; }
+    .mensagens { margin-top: 20px; }
+    .mensagem { padding: 10px; border-bottom: 1px solid #ddd; }
+  </style>
 </head>
 <body>
-<h2>Controle Parental</h2>
-<p>Bem-vindo, <?php echo htmlspecialchars($usuario['nome']); ?>!</p>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="profile">
+        <img src="uploads/profile.jpg" alt="Foto de perfil">
+        <p><strong><?= htmlspecialchars($usuario['nome']) ?></strong></p>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="perfil.php">Perfil</a></li>
+          <li><a href="index.php">Explorar</a></li>
+          <li><a href="reels.php">Reels</a></li>
+          <li><a href="chat.php">Chat geral</a></li>
+          <li><a href="projetos.php">Projetos</a></li>
+          <li><a href="configuracoes.php">Configurações</a></li>
+          <li><a href="parente.php" class="active">Controle parental</a></li>
+        </ul>
+      </nav>
+    </aside>
 
-<?php if ($mensagemErro) echo "<p style='color:red;'>$mensagemErro</p>"; ?>
-<?php if ($mensagemSucesso) echo "<p style='color:green;'>$mensagemSucesso</p>"; ?>
+    <!-- Conteúdo principal -->
+    <main class="content">
+      <div class="parental-container">
+        <h2>Controle Parental</h2>
+        <p>Adicione e visualize as mensagens enviadas por seus filhos.</p>
 
-<h3>Adicionar filho</h3>
-<form method="post" action="parente.php">
-    <input type="email" name="email_filho" placeholder="Email do filho" required>
-    <button type="submit">Adicionar</button>
-</form>
+        <?php if (isset($msg)) echo "<p><strong>$msg</strong></p>"; ?>
 
-<h3>Filhos cadastrados</h3>
-<?php if (count($filhos) > 0): ?>
-<form method="post" action="parente.php">
-    <select name="id_filho" required>
-        <option value="">-- Selecione um filho --</option>
-        <?php foreach ($filhos as $f): ?>
-            <option value="<?php echo $f['id_usuario']; ?>" 
-              <?php echo ($filhoSelecionado && $filhoSelecionado['id_usuario'] == $f['id_usuario']) ? "selected" : ""; ?>>
-              <?php echo htmlspecialchars($f['nome'] . " (" . $f['email'] . ")"); ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
-    <button type="submit">Ver mensagens</button>
-</form>
-<?php else: ?>
-<p>Nenhum filho cadastrado ainda.</p>
-<?php endif; ?>
+        <!-- Formulário para adicionar filho -->
+        <form method="POST" action="">
+          <label for="email_filho">Adicionar filho pelo email:</label><br>
+          <input type="email" name="email_filho" required>
+          <button type="submit">Adicionar</button>
+        </form>
 
-<?php if ($filhoSelecionado): ?>
-<h3>Mensagens de <?php echo htmlspecialchars($filhoSelecionado['nome']); ?></h3>
-<?php if (count($mensagens) > 0): ?>
-<ul>
-    <?php foreach ($mensagens as $msg): ?>
-        <li><strong><?php echo date("d/m/Y H:i", strtotime($msg['data_envio'])); ?>:</strong>
-            <?php echo htmlspecialchars($msg['texto']); ?></li>
-    <?php endforeach; ?>
-</ul>
-<?php else: ?>
-<p>Este filho ainda não enviou mensagens.</p>
-<?php endif; ?>
-<?php endif; ?>
+        <!-- Selecionar filho -->
+        <form method="POST" action="" style="margin-top: 20px;">
+          <label for="id_filho">Escolha o filho:</label>
+          <select name="id_filho" required>
+            <option value="">-- Selecione --</option>
+            <?php while ($f = $filhos->fetch_assoc()): ?>
+              <option value="<?= $f['id_usuario'] ?>"><?= htmlspecialchars($f['nome']) ?> (<?= htmlspecialchars($f['email']) ?>)</option>
+            <?php endwhile; ?>
+          </select>
+          <button type="submit">Ver mensagens</button>
+        </form>
+
+        <!-- Mensagens -->
+        <div class="mensagens">
+          <?php if (!empty($mensagens) && $mensagens->num_rows > 0): ?>
+            <h3>Mensagens do filho selecionado:</h3>
+            <?php while ($m = $mensagens->fetch_assoc()): ?>
+              <div class="mensagem">
+                <p><?= htmlspecialchars($m['texto']) ?></p>
+                <small><?= htmlspecialchars($m['data_envio']) ?></small>
+              </div>
+            <?php endwhile; ?>
+          <?php elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_filho'])): ?>
+            <p>Nenhuma mensagem encontrada para este filho.</p>
+          <?php endif; ?>
+        </div>
+      </div>
+    </main>
+  </div>
 </body>
 </html>
