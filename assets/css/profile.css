@@ -5,21 +5,20 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #fafafa;
   color: #333;
-  line-height: 1.5;
 }
 
-/* Cabeçalho */
+/* Barra roxa do topo */
 .header {
-  background: linear-gradient(90deg, purple, #6a0dad);
-  padding: 15px 20px;
+  background: #5b1474;
+  color: white;
   display: flex;
   align-items: center;
-  font-weight: bold;
-  color: white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  padding: 12px 20px;
+  font-size: 1.1rem;
+  font-weight: 500;
 }
 
 .back-arrow {
@@ -27,116 +26,115 @@ body {
   font-size: 1.5rem;
   margin-right: 12px;
   color: #fff;
-  transition: transform 0.2s ease-in-out;
 }
 
-.back-arrow:hover {
-  transform: translateX(-4px);
-}
-
-/* Capa arredondada */
 .cover {
-  background: linear-gradient(180deg, rgba(128,0,128,0.7), rgba(128,0,128,0.4));
-  height: 260px;
-  border-bottom-left-radius: 50% 30%;
-  border-bottom-right-radius: 50% 30%;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-}
-
-/* Container do perfil */
-.profile-container {
-  max-width: 360px;
-  background: #fff;
-  margin: -120px auto 40px;
-  border-radius: 15px;
-  padding: 25px 20px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-  text-align: center;
-  transition: transform 0.2s ease-in-out;
-}
-
-.profile-container:hover {
-  transform: translateY(-4px);
+  height: 140px;
+  background: #5b1474;
 }
 
 /* Foto de perfil */
+.profile-container {
+  max-width: 800px;
+  margin: -70px auto 40px;
+  padding: 0 20px;
+}
+
 .profile-pic-container {
   position: relative;
-  display: inline-block;
+  width: 110px;
+  height: 110px;
+  margin: 0 auto;
 }
 
 .profile-pic {
-  width: 130px;
-  height: 130px;
-  object-fit: cover;
-  border-radius: 12px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
   border: 4px solid #fff;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-  transition: transform 0.2s ease-in-out;
-}
-
-.profile-pic:hover {
-  transform: scale(1.05);
+  object-fit: cover;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
 }
 
 .edit-icon {
   position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: #007bff;
+  bottom: 4px;
+  right: 4px;
+  background: #5b1474;
   color: white;
   font-size: 0.9rem;
-  padding: 7px;
+  padding: 6px;
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  transition: background 0.2s ease-in-out;
 }
 
-.edit-icon:hover {
-  background: #0056b3;
+/* Formulário */
+form {
+  margin-top: 30px;
 }
 
-/* Seções de informações */
+/* Sessão de informações */
 .info-section {
-  text-align: left;
-  margin-top: 22px;
+  margin-bottom: 18px;
 }
 
 .info-label {
   font-size: 0.85rem;
-  color: #666;
+  color: #444;
+  margin-bottom: 6px;
 }
 
 .info-value {
-  background: #f7f7f7;
+  width: 100%;
   padding: 10px;
-  border-radius: 8px;
-  margin-top: 6px;
-  border: 1px solid transparent;
-  transition: border 0.2s ease-in-out, background 0.2s ease-in-out;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: #f7f7f7;
 }
 
-.info-value[contenteditable="true"] {
-  border: 1px solid #aaa;
-  background: #fff;
+.info-value:disabled {
+  color: #333;
 }
 
-/* Botão editar */
-.edit-btn {
-  margin-top: 22px;
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #007bff, #0056b3);
-  color: white;
+/* Caixas principais */
+form hr {
   border: none;
-  border-radius: 8px;
+  height: 1px;
+  background: #ddd;
+  margin: 25px 0;
+}
+
+/* Botões */
+.edit-btn {
+  padding: 10px 22px;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
-  transition: all 0.2s ease-in-out;
+  color: white;
+  background: #5b1474;
+  transition: 0.2s;
 }
 
 .edit-btn:hover {
-  background: linear-gradient(135deg, #0056b3, #00408d);
-  transform: translateY(-2px);
-  box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+  background: #3c0e4f;
+}
+
+/* Layout em duas colunas para info */
+@media (min-width: 600px) {
+  form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 24px;
+  }
+
+  form hr {
+    grid-column: span 2;
+  }
+
+  form > div[style] {
+    grid-column: span 2;
+    text-align: center;
+  }
 }

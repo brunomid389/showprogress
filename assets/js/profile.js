@@ -1,29 +1,64 @@
 function toggleEdit() {
-  const fields = document.querySelectorAll('.info-value');
-  const btn = document.querySelector('.edit-btn');
+  const inputs = document.querySelectorAll(".info-value");
+  const saveBtn = document.getElementById("save-btn");
+  const cancelBtn = document.getElementById("cancel-btn");
+  const editBtn = document.querySelector(".edit-btn");
+  const profilePic = document.getElementById("profile-pic");
+  const fileInput = document.getElementById("profile-pic-input");
 
-  if (btn.textContent === 'Editar') {
-    fields.forEach(f => f.setAttribute('contenteditable', 'true'));
-    btn.textContent = 'Salvar';
-  } else {
-    fields.forEach(f => f.setAttribute('contenteditable', 'false'));
-    btn.textContent = 'Editar';
+  // guarda imagem original se ainda não tiver
+  if (!profilePic.dataset.original) {
+    profilePic.dataset.original = profilePic.src;
+  }
 
-    // Atualiza inputs escondidos
-    const form = document.getElementById('profileForm');
-    form.querySelector('input[name="nome"]').value = fields[0].textContent.trim();
-    form.querySelector('input[name="telefone"]').value = fields[1].textContent.trim();
-    form.querySelector('input[name="email"]').value = fields[2].textContent.trim();
-    form.querySelector('input[name="senha"]').value = fields[3].textContent.trim();
-    form.querySelector('input[name="nascimento"]').value = fields[4].textContent.trim();
+  // Ativa edição dos campos
+  inputs.forEach(input => input.disabled = false);
+  saveBtn.style.display = "inline-block";
+  cancelBtn.style.display = "inline-block";
+  editBtn.style.display = "none";
+  fileInput.style.display = "block";
 
-    form.submit(); // envia para atualizar no banco
+  // Preview da imagem nova
+  fileInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        profilePic.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
+function cancelEdit() {
+  const inputs = document.querySelectorAll(".info-value");
+  const saveBtn = document.getElementById("save-btn");
+  const cancelBtn = document.getElementById("cancel-btn");
+  const editBtn = document.querySelector(".edit-btn");
+  const profilePic = document.getElementById("profile-pic");
+  const fileInput = document.getElementById("profile-pic-input");
+
+  // Volta os inputs para desativados
+  inputs.forEach(input => input.disabled = true);
+
+  // Esconde botões e input
+  saveBtn.style.display = "none";
+  cancelBtn.style.display = "none";
+  editBtn.style.display = "inline-block";
+  fileInput.style.display = "none";
+
+  // restaura imagem original
+  if (profilePic.dataset.original) {
+    profilePic.src = profilePic.dataset.original;
   }
 }
 
-function editProfilePic() {
-  const newUrl = prompt('Insira a URL da nova foto de perfil:');
-  if (newUrl) {
-    document.querySelector('.profile-pic').src = newUrl;
+// Confirmação antes de salvar
+document.querySelector("form").addEventListener("submit", function (e) {
+  const confirmSave = confirm("Deseja salvar as alterações?");
+  if (!confirmSave) {
+    e.preventDefault();
+    cancelEdit();
   }
-}
+});

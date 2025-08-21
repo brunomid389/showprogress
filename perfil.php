@@ -65,59 +65,55 @@ $conn->close();
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perfil</title>
+  <title>Perfil & Configurações</title>
   <link href="assets/css/profile.css" rel="stylesheet">
 </head>
 <body>
 
   <div class="header">
     <a href="index.php" class="back-arrow">←</a>
-    Perfil
+    Perfil & Configurações
   </div>
 
   <div class="cover"></div>
 
   <div class="profile-container">
     <div class="profile-pic-container">
-      <img src="https://randomuser.me/api/portraits/men/42.jpg" alt="Foto de perfil" class="profile-pic">
-      <div class="edit-icon" onclick="editProfilePic()">✎</div>
+      <img id="profile-pic" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Foto de perfil" class="profile-pic">
+      <div class="edit-icon" onclick="document.getElementById('profile-pic-input').click()">✎</div>
+      <input type="file" id="profile-pic-input" name="profile_pic" accept="image/*" style="display:none;">
     </div>
 
-    <form action="perfil.php" method="post" id="profileForm">
+    <form action="perfil.php" method="post" enctype="multipart/form-data" id="profileForm">
       
       <div class="info-section">
-        <div name="nome" class="info-label">Nome</div>
-        <div class="info-value" contenteditable="false"><?= htmlspecialchars($usuario['nome']); ?></div>
-        <input type="hidden" name="nome">
+        <div class="info-label">Nome</div>
+        <input type="text" name="nome" class="info-value" value="<?= htmlspecialchars($usuario['nome']); ?>" disabled>
       </div>
 
       <div class="info-section">
-        <div name="telefone" class="info-label">Telefone</div>
-        <div class="info-value" contenteditable="false"><?= htmlspecialchars($usuario['telefone']); ?></div>
-        <input type="hidden" name="telefone">
+        <div class="info-label">Telefone</div>
+        <input type="tel" name="telefone" class="info-value" value="<?= htmlspecialchars($usuario['telefone']); ?>" disabled>
       </div>
 
       <div class="info-section">
-        <div name="email" class="info-label">Email</div>
-        <div class="info-value" contenteditable="false"><?= htmlspecialchars($usuario['email']); ?></div>
-        <input type="hidden" name="email">
+        <div class="info-label">Email</div>
+        <input type="email" name="email" class="info-value" value="<?= htmlspecialchars($usuario['email']); ?>" disabled>
       </div>
 
       <div class="info-section">
-        <div name="senha" class="info-label">Senha</div>
-        <div class="info-value" contenteditable="false"><?= htmlspecialchars($usuario['senha']); ?></div>
-        <input type="hidden" name="senha">
+        <div class="info-label">Senha</div>
+        <input type="password" name="senha" class="info-value" value="<?= htmlspecialchars($usuario['senha']); ?>" disabled>
       </div>
 
       <div class="info-section">
-        <div name="nascimento" class="info-label">Data de Nascimento</div>
-        <div class="info-value" contenteditable="false"><?= htmlspecialchars($usuario['nascimento']); ?></div>
-        <input type="hidden" name="nascimento">
+        <div class="info-label">Data de Nascimento</div>
+        <input type="date" name="nascimento" class="info-value" value="<?= htmlspecialchars($usuario['nascimento']); ?>" disabled>
       </div>
 
       <div class="info-section">
-        <div name="comunidade" class="info-label">Comunidade</div>
-        <div class="info-value" contenteditable="false"><?= htmlspecialchars($usuario['bairro'] . " - " . $usuario['cidade'] . "/" . $usuario['uf']); ?></div>
+        <div class="info-label">Comunidade</div>
+        <input type="text" class="info-value" value="<?= htmlspecialchars($usuario['bairro'] . " - " . $usuario['cidade'] . "/" . $usuario['uf']); ?>" disabled>
       </div>
 
       <hr style="margin:20px 0;">
@@ -145,8 +141,13 @@ $conn->close();
           <option value="es">Espanhol</option>
         </select>
       </div>
-      
-      <button class="edit-btn" type="button" onclick="toggleEdit()">Editar</button>
+
+      <div style="display:flex; gap:10px; margin-top:20px; justify-content:center;">
+        <button type="button" class="edit-btn" onclick="toggleEdit()">Editar</button>
+        <button type="submit" class="edit-btn" style="background:green; display:none;" id="save-btn">Salvar</button>
+        <button type="button" class="edit-btn" style="background:gray; display:none;" id="cancel-btn" onclick="cancelEdit()">Cancelar</button>
+      </div>
+
     </form>
   </div>
 
