@@ -50,7 +50,7 @@ $result = $conn->query($sql);
     <aside class="sidebar">
       <div class="profile-section">
         <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Foto de perfil" class="profile-pic">
-        <div class="profile-name"><?php echo htmlspecialchars($usuario['nome']); ?></div>
+        <div class="profile-name"><?= htmlspecialchars($usuario['nome']); ?></div>
       </div>
 
       <nav class="menu">
@@ -99,9 +99,12 @@ $result = $conn->query($sql);
           <textarea name="texto" placeholder="escreva seu texto aqui" id="te"></textarea>
           <textarea name="tag" placeholder="escreva suas tags aqui" id="ta"></textarea>
 
+          <!-- input escondido para imagem -->
+          <input type="file" id="imageInput" accept="image/*" style="display:none;" />
+
           <div class="icons">
             <i class="icon">📎</i>
-            <i class="icon">🖼️</i>
+            <i class="icon" id="imgIcon">🖼️</i>
             <i class="icon">🔤</i>
             <i class="icon">⚠️</i>
           </div>
@@ -113,6 +116,7 @@ $result = $conn->query($sql);
 
   <div id="overlay" style="display:none;"></div>
 
+  <!-- Scripts -->
   <script src="assets/js/script.js"></script>
 </body>
 </html>
