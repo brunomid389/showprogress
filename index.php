@@ -6,7 +6,7 @@ if (!$usuario) header("Location: login.html");
 include("conexao.php");
 
 // Buscar posts com imagem binária
-$sql = "SELECT p.id_postagem, p.titulo, p.texto, p.img_bin, t.nome AS tag, u.nome AS usuario, c.uf, c.cidade, c.bairro
+$sql = "SELECT p.id_postagem, p.titulo, p.texto, p.img_url, t.nome AS tag, u.nome AS usuario, c.uf, c.cidade, c.bairro
         FROM postagem p
         INNER JOIN tag t ON p.id_tag = t.id_tag
         INNER JOIN usuario u ON p.id_usuario = u.id_usuario
@@ -73,12 +73,12 @@ $result = $conn->query($sql);
       <?php
       if ($result->num_rows > 0) {
           while ($post = $result->fetch_assoc()) {
-              $tipo = $post['img_bin'] ? 'imagem' : 'texto';
+              $tipo = $post['img_url'] ? 'imagem' : 'texto';
               echo '<div class="post" data-type="'.$tipo.'">';
               echo '<h3>'.htmlspecialchars($post['titulo']).'</h3>';
               echo '<p>'.htmlspecialchars($post['texto']).'</p>';
-              if ($post['img_bin']) {
-                  $imgData = base64_encode($post['img_bin']);
+              if ($post['img_url']) {
+                  $imgData = base64_encode($post['img_url']);
                   echo '<img src="data:image/jpeg;base64,'.$imgData.'" style="max-width:100%; border-radius:10px;">';
               }
               echo '<small>Por '.htmlspecialchars($post['usuario']).' | Tag: '.htmlspecialchars($post['tag']).'</small>';
