@@ -57,6 +57,9 @@ $result = $conn->query($sql);
   </aside>
 
   <section class="feed-area">
+        <div class="textt">
+        <h1>Encontre o que você quer ver</h1>
+      </div>
     <div class="search-container">
       <input type="text" class="search" placeholder="Pesquisar..." />
     </div>
